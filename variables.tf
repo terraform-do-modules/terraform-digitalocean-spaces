@@ -14,25 +14,20 @@ variable "environment" {
 
 variable "label_order" {
   type        = list(any)
-  default     = []
+  default     = ["name", "environment"]
   description = "Label order, e.g. `name`,`application`."
 }
 
-variable "delimiter" {
+variable "managedby" {
   type        = string
-  default     = "-"
-  description = "Delimiter to be used between `organization`, `environment`, `name` and `attributes`."
-}
-variable "attributes" {
-  type        = list(any)
-  default     = []
-  description = "Additional attributes (e.g. `1`)."
+  default     = "terraform-do-modules"
+  description = "ManagedBy, eg 'terraform-do-modules' or 'hello@clouddrove.com'"
 }
 
 variable "region" {
   type        = string
-  default     = ""
-  description = "The region to create VPC, like ``london-1`` , ``bangalore-1`` ,``newyork-3`` ``toronto-1``. "
+  default     = "blr1"
+  description = "The region to create spaces."
 }
 
 #Module      : spaces
@@ -69,39 +64,23 @@ variable "cors_rule" {
   description = "CORS Configuration specification for this bucket"
 }
 
-variable "prefix" {
-  type        = string
-  default     = null
-  description = " (Optional, Forces new resource) Creates a unique bucket name beginning with the specified prefix."
+
+variable "lifecycle_rule" {
+  type    = list(any)
+  default = []
+}
+variable "expiration" {
+  type    = list(any)
+  default = []
 }
 
-variable "abort_incomplete_multipart_upload_days" {
-  type        = number
-  default     = null
-  description = "Specifies the number of days after initiating a multipart upload when the multipart upload must be completed or else Spaces will abort the upload."
+variable "policy" {
+  type    = any
+  default = null
 }
 
-variable "date" {
-  type        = string
-  default     = null
-  description = "pecifies the date/time after which you want applicable objects to expire. The argument uses RFC3339 format, e.g.(2020-03-22T15:03:55Z) or parts thereof e.g. 2019-02-28."
-}
-
-variable "expiration_days" {
-  type        = number
-  default     = null
-  description = "Specifies the number of days after object creation when the applicable objects will expire."
-
-}
-
-variable "expired_object_delete_marker" {
-  type        = string
-  default     = ""
-  description = "On a versioned bucket (versioning-enabled or versioning-suspended bucket), setting this to true directs Spaces to delete expired object delete markers."
-}
-
-variable "noncurrent_version_expiration" {
-  type        = string
-  default     = ""
-  description = "On a versioned bucket (versioning-enabled or versioning-suspended bucket), setting this to true directs Spaces to delete expired object delete markers."
+variable "enabled" {
+  type        = bool
+  default     = true
+  description = "Whether to create the resources. Set to `false` to prevent the module from creating any resources."
 }
