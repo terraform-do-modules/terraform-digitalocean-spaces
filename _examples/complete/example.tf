@@ -49,8 +49,8 @@ module "spaces" {
         "Principal" : "*",
         "Action" : "s3:*",
         "Resource" : [
-          "arn:aws:s3:::clouddrove-test5",
-          "arn:aws:s3:::clouddrove-test5/*"
+          "arn:aws:s3:::spaces-name",
+          "arn:aws:s3:::spaces-name/*"
         ],
         "Condition" : {
           "NotIpAddress" : {
