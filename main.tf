@@ -1,41 +1,19 @@
-## Managed By : CloudDrove
-##Description : This Script is used to create VPC.
-## Copyright @ CloudDrove. All Right Reserved.
-
-# locals for regions
-locals {
-  region = {
-    amsterdam-2 = "ams2"
-    amsterdam-3 = "ams3"
-    bangalore-1 = "blr1"
-    frankfurt-1 = "fra1"
-    london-1    = "lon-1"
-    newyork-1   = "nyc1"
-    newyork-2   = "nyc2"
-    newyork-3   = "nyc3"
-    francisco-1 = "sfo1"
-    singapore-1 = "sgp1"
-    toronto-1   = "tor1"
-  }
-}
-
-#Module      : LABEL
-#Description : Terraform label module variables.
+##-----------------------------------------------------------------------------
+## Labels module callled that will be used for naming and tags.
+##-----------------------------------------------------------------------------
 module "labels" {
-  source      = "terraform-do-modules/labels/digitalocean"
-  version     = "0.15.0"
+  source      = "git::https://github.com/terraform-do-modules/terraform-digitalocean-labels.git?ref=internal-426m"
   name        = var.name
   environment = var.environment
+  managedby   = var.managedby
   label_order = var.label_order
-  attributes  = var.attributes
-
-
 }
 
 #Module      : Spaces
 #Description : Provides a bucket resource for Spaces, DigitalOcean's object storage product.
 
 resource "digitalocean_spaces_bucket" "spaces" {
+  count  = var.enabled ? 1 : 0
   name   = module.labels.id
   region = var.region
   acl    = var.acl
@@ -53,23 +31,40 @@ resource "digitalocean_spaces_bucket" "spaces" {
     }
   }
 
-  lifecycle_rule {
-    enabled = false
-    prefix  = var.prefix
+  dynamic "lifecycle_rule" {
+    for_each = var.lifecycle_rule
+    content {
+      id                                     = lookup(lifecycle_rule.value, "id", null)
+      enabled                                = lookup(lifecycle_rule.value, "enabled", false)
+      prefix                                 = lookup(lifecycle_rule.value, "prefix", null)
+      abort_incomplete_multipart_upload_days = lookup(lifecycle_rule.value, "abort_incomplete_multipart_upload_days", null)
+      dynamic "expiration" {
+        for_each = var.expiration
+        content {
+          date = lookup(expiration.value, "date", null)
+          days = lookup(expiration.value, "days", null)
 
-    abort_incomplete_multipart_upload_days = var.abort_incomplete_multipart_upload_days
-    expiration {
-      date = var.date
-      days = var.expiration_days
-
-      expired_object_delete_marker = var.expired_object_delete_marker
-    }
-    noncurrent_version_expiration {
-      days = var.noncurrent_version_expiration
+          expired_object_delete_marker = lookup(expiration.value, "expired_object_delete_marker", false)
+        }
+      }
+      noncurrent_version_expiration {
+        days = lookup(lifecycle_rule.value, "noncurrent_version_expiration_days", null)
+      }
     }
   }
+
   versioning {
     enabled = var.versioning
   }
 
 }
+
+
+resource "digitalocean_spaces_bucket_policy" "foobar" {
+  count = var.enabled && var.policy != null ? 1 : 0
+
+  region = join("", digitalocean_spaces_bucket.spaces[*].region)
+  bucket = join("", digitalocean_spaces_bucket.spaces[*].name)
+  policy = var.policy
+}
+
