@@ -17,20 +17,20 @@
   <img src="https://img.shields.io/badge/Terraform-v0.15-green" alt="Terraform">
 </a>
 <a href="LICENSE.md">
-  <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="Licence">
+  <img src="https://img.shields.io/badge/License-APACHE-blue.svg" alt="Licence">
 </a>
 
 
 </p>
 <p align="center">
 
-<a href='https://facebook.com/sharer/sharer.php?u=https://github.com/clouddrove/terraform-digitalocean-spaces'>
+<a href='https://facebook.com/sharer/sharer.php?u=https://github.com/terraform-do-modules/terraform-digitalocean-spaces'>
   <img title="Share on Facebook" src="https://user-images.githubusercontent.com/50652676/62817743-4f64cb80-bb59-11e9-90c7-b057252ded50.png" />
 </a>
-<a href='https://www.linkedin.com/shareArticle?mini=true&title=Terraform+Digitalocean+spaces&url=https://github.com/clouddrove/terraform-digitalocean-spaces'>
+<a href='https://www.linkedin.com/shareArticle?mini=true&title=Terraform+Digitalocean+spaces&url=https://github.com/terraform-do-modules/terraform-digitalocean-spaces'>
   <img title="Share on LinkedIn" src="https://user-images.githubusercontent.com/50652676/62817742-4e339e80-bb59-11e9-87b9-a1f68cae1049.png" />
 </a>
-<a href='https://twitter.com/intent/tweet/?text=Terraform+Digitalocean+spaces&url=https://github.com/clouddrove/terraform-digitalocean-spaces'>
+<a href='https://twitter.com/intent/tweet/?text=Terraform+Digitalocean+spaces&url=https://github.com/terraform-do-modules/terraform-digitalocean-spaces'>
   <img title="Share on Twitter" src="https://user-images.githubusercontent.com/50652676/62817740-4c69db00-bb59-11e9-8a79-3580fbbf6d5c.png" />
 </a>
 
@@ -51,7 +51,7 @@ We have [*fifty plus terraform modules*][terraform_modules]. A few of them are c
 
 This module has a few dependencies: 
 
-- [Terraform 0.15](https://learn.hashicorp.com/terraform/getting-started/install.html)
+- [Terraform 1.x.x](https://learn.hashicorp.com/terraform/getting-started/install.html)
 - [Go](https://golang.org/doc/install)
 - [github.com/stretchr/testify/assert](https://github.com/stretchr/testify)
 - [github.com/gruntwork-io/terratest/modules/terraform](https://github.com/gruntwork-io/terratest)
@@ -65,21 +65,80 @@ This module has a few dependencies:
 ## Examples
 
 
-**IMPORTANT:** Since the `master` branch used in `source` varies based on new modifications, we suggest that you use the release versions [here](https://github.com/clouddrove/terraform-digitalocean-spaces/releases).
+**IMPORTANT:** Since the `master` branch used in `source` varies based on new modifications, we suggest that you use the release versions [here](https://github.com/terraform-do-modules/terraform-digitalocean-spaces/releases).
 
 
 ### Simple Example
 Here is an example of how you can use this module in your inventory structure:
+### basic example
 ```hcl
       module "spaces" {
       source        = "terraform-do-modules/spaces/digitalocean"
       version       = "0.15.0"
-      name          = "clouddrove"
+      name          = "spaces"
       environment   = "test"
-      label_order   = ["name"]
-      acl           = "public-read"
-      force_destroy = true
+      acl           = "private"
+      force_destroy = false
       region        = "nyc3"
+    }
+```
+### complete example
+```hcl
+      module "spaces" {
+      source        = "terraform-do-modules/spaces/digitalocean"
+      version       = "0.15.0"
+      name          = "spaces"
+      environment   = "test"
+      acl           = "private"
+      force_destroy = false
+      region        = "nyc3"
+
+      cors_rule = [
+        {
+          allowed_headers = ["*"]
+          allowed_methods = ["PUT", "POST"],
+          allowed_origins = ["https://www.example.com"],
+          expose_headers  = ["ETag"],
+          max_age_seconds = 3000
+        }
+      ]
+
+      lifecycle_rule = [
+        {
+          enabled                                = true
+          abort_incomplete_multipart_upload_days = 20
+          expiration = [
+            {
+              date                         = "2029-02-28"
+              days                         = 85
+              expired_object_delete_marker = true
+            }
+          ]
+          noncurrent_version_expiration_days = 15
+
+        }
+      ]
+
+      policy = jsonencode({
+        "Version" : "2012-10-17",
+        "Statement" : [
+          {
+            "Sid" : "IPAllow",
+            "Effect" : "Deny",
+            "Principal" : "*",
+            "Action" : "s3:*",
+            "Resource" : [
+              "arn:aws:s3:::space-name",
+              "arn:aws:s3:::space-name/*"
+            ],
+            "Condition" : {
+              "NotIpAddress" : {
+                "aws:SourceIp" : "0.0.0.0/0"
+              }
+            }
+          }
+        ]
+      })
     }
 ```
 
@@ -92,21 +151,18 @@ Here is an example of how you can use this module in your inventory structure:
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| abort\_incomplete\_multipart\_upload\_days | Specifies the number of days after initiating a multipart upload when the multipart upload must be completed or else Spaces will abort the upload. | `number` | `null` | no |
 | acl | Canned ACL applied on bucket creation (private or public-read). | `string` | `null` | no |
-| attributes | Additional attributes (e.g. `1`). | `list(any)` | `[]` | no |
 | cors\_rule | CORS Configuration specification for this bucket | <pre>list(object({<br>    allowed_headers = list(string)<br>    allowed_methods = list(string)<br>    allowed_origins = list(string)<br>    expose_headers  = list(string)<br>    max_age_seconds = number<br>  }))</pre> | `null` | no |
-| date | pecifies the date/time after which you want applicable objects to expire. The argument uses RFC3339 format, e.g.(2020-03-22T15:03:55Z) or parts thereof e.g. 2019-02-28. | `string` | `null` | no |
-| delimiter | Delimiter to be used between `organization`, `environment`, `name` and `attributes`. | `string` | `"-"` | no |
+| enabled | Whether to create the resources. Set to `false` to prevent the module from creating any resources. | `bool` | `true` | no |
 | environment | Environment (e.g. `prod`, `dev`, `staging`). | `string` | `""` | no |
-| expiration\_days | Specifies the number of days after object creation when the applicable objects will expire. | `number` | `null` | no |
-| expired\_object\_delete\_marker | On a versioned bucket (versioning-enabled or versioning-suspended bucket), setting this to true directs Spaces to delete expired object delete markers. | `string` | `""` | no |
+| expiration | n/a | `list(any)` | `[]` | no |
 | force\_destroy | Unless true, the bucket will only be destroyed if empty (Defaults to false). | `bool` | `false` | no |
-| label\_order | Label order, e.g. `name`,`application`. | `list(any)` | `[]` | no |
+| label\_order | Label order, e.g. `name`,`application`. | `list(any)` | <pre>[<br>  "name",<br>  "environment"<br>]</pre> | no |
+| lifecycle\_rule | n/a | `list(any)` | `[]` | no |
+| managedby | ManagedBy, eg 'terraform-do-modules' or 'hello@clouddrove.com' | `string` | `"terraform-do-modules"` | no |
 | name | Name  (e.g. `app` or `cluster`). | `string` | `""` | no |
-| noncurrent\_version\_expiration | On a versioned bucket (versioning-enabled or versioning-suspended bucket), setting this to true directs Spaces to delete expired object delete markers. | `string` | `""` | no |
-| prefix | (Optional, Forces new resource) Creates a unique bucket name beginning with the specified prefix. | `string` | `null` | no |
-| region | The region to create VPC, like `london-1` , `bangalore-1` ,`newyork-3` `toronto-1`. | `string` | `""` | no |
+| policy | n/a | `any` | `null` | no |
+| region | The region to create spaces. | `string` | `"blr1"` | no |
 | versioning | (Optional) A state of versioning (documented below). | `bool` | `true` | no |
 
 ## Outputs
@@ -131,9 +187,9 @@ You need to run the following command in the testing folder:
 
 
 ## Feedback 
-If you come accross a bug or have any feedback, please log it in our [issue tracker](https://github.com/clouddrove/terraform-digitalocean-spaces/issues), or feel free to drop us an email at [hello@clouddrove.com](mailto:hello@clouddrove.com).
+If you come accross a bug or have any feedback, please log it in our [issue tracker](https://github.com/terraform-do-modules/terraform-digitalocean-spaces/issues), or feel free to drop us an email at [hello@clouddrove.com](mailto:hello@clouddrove.com).
 
-If you have found it worth your time, go ahead and give us a ★ on [our GitHub](https://github.com/clouddrove/terraform-digitalocean-spaces)!
+If you have found it worth your time, go ahead and give us a ★ on [our GitHub](https://github.com/terraform-do-modules/terraform-digitalocean-spaces)!
 
 ## About us
 
