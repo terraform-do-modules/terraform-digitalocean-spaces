@@ -1,6 +1,4 @@
 provider "digitalocean" {
-  spaces_access_id  = "xxxxxxxxxxxxxxxxxxxx"
-  spaces_secret_key = "xxxxxxxxxxxxxxxxxxxx"
 }
 
 ##------------------------------------------------
