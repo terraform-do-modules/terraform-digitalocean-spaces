@@ -10,9 +10,9 @@ module "labels" {
   label_order = var.label_order
 }
 
-##############################################################################################
+##-----------------------------------------------------------------------------
 ##Description : Provides a bucket resource for Spaces, DigitalOcean's object storage product.
-##############################################################################################
+##-----------------------------------------------------------------------------
 resource "digitalocean_spaces_bucket" "spaces" {
   count         = var.enabled ? 1 : 0
   name          = module.labels.id
@@ -42,7 +42,6 @@ resource "digitalocean_spaces_bucket" "spaces" {
         content {
           date = lookup(expiration.value, "date", null)
           days = lookup(expiration.value, "days", null)
-
           expired_object_delete_marker = lookup(expiration.value, "expired_object_delete_marker", false)
         }
       }
@@ -51,15 +50,14 @@ resource "digitalocean_spaces_bucket" "spaces" {
       }
     }
   }
-
   versioning {
     enabled = var.versioning
   }
 }
 
-################################################################################################################
+##-----------------------------------------------------------------------------
 #Description : The digitalocean_spaces_bucket_policy resource allows Terraform to attach bucket policy to Spaces.
-################################################################################################################
+##-----------------------------------------------------------------------------
 resource "digitalocean_spaces_bucket_policy" "foobar" {
   count  = var.enabled && var.policy != null ? 1 : 0
   region = join("", digitalocean_spaces_bucket.spaces[*].region)
