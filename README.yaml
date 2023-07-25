@@ -24,8 +24,7 @@ badges:
 
 #  description of this project
 description: |-
-  spaces are virtual networks containing resources that can communicate with each other in full isolation, using private IP addresses.
-
+  Terraform module to create Digitalocean spaces service resource on Digitalocean.
 # extra content
 include:
   - "terraform.md"
@@ -38,7 +37,7 @@ usage : |-
   ```hcl
         module "spaces" {
         source        = "terraform-do-modules/spaces/digitalocean"
-        version       = "0.15.0"
+        version       = "1.0.0"
         name          = "spaces"
         environment   = "test"
         acl           = "private"
@@ -50,7 +49,7 @@ usage : |-
   ```hcl
         module "spaces" {
         source        = "terraform-do-modules/spaces/digitalocean"
-        version       = "0.15.0"
+        version       = "1.0.0"
         name          = "spaces"
         environment   = "test"
         acl           = "private"

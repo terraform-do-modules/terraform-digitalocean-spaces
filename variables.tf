@@ -20,7 +20,7 @@ variable "label_order" {
 
 variable "managedby" {
   type        = string
-  default     = "terraform-do-modules"
+  default     = "hello@clouddrove.com"
   description = "ManagedBy, eg 'terraform-do-modules' or 'hello@clouddrove.com'"
 }
 
@@ -32,7 +32,6 @@ variable "region" {
 
 #Module      : spaces
 #Description : Provides a bucket resource for Spaces, DigitalOcean's object storage product.
-
 
 variable "acl" {
   type        = string
@@ -64,19 +63,22 @@ variable "cors_rule" {
   description = "CORS Configuration specification for this bucket"
 }
 
-
 variable "lifecycle_rule" {
-  type    = list(any)
-  default = []
+  type        = list(any)
+  default     = []
+  description = "A configuration of object lifecycle management (documented below)."
 }
+
 variable "expiration" {
-  type    = list(any)
-  default = []
+  type        = list(any)
+  default     = []
+  description = "Specifies a time period after which applicable objects expire (documented below)."
 }
 
 variable "policy" {
-  type    = any
-  default = null
+  type        = any
+  default     = null
+  description = "The text of the policy."
 }
 
 variable "enabled" {
