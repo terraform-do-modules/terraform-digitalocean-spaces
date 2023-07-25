@@ -2,27 +2,26 @@
 ## Labels module callled that will be used for naming and tags.
 ##-----------------------------------------------------------------------------
 module "labels" {
-  source      = "git::https://github.com/terraform-do-modules/terraform-digitalocean-labels.git?ref=internal-426m"
+  source      = "terraform-do-modules/labels/digitalocean"
+  version     = "1.0.0"
   name        = var.name
   environment = var.environment
   managedby   = var.managedby
   label_order = var.label_order
 }
 
-#Module      : Spaces
-#Description : Provides a bucket resource for Spaces, DigitalOcean's object storage product.
-
+##-----------------------------------------------------------------------------
+##Description : Provides a bucket resource for Spaces, DigitalOcean's object storage product.
+##-----------------------------------------------------------------------------
 resource "digitalocean_spaces_bucket" "spaces" {
-  count  = var.enabled ? 1 : 0
-  name   = module.labels.id
-  region = var.region
-  acl    = var.acl
-
+  count         = var.enabled ? 1 : 0
+  name          = module.labels.id
+  region        = var.region
+  acl           = var.acl
   force_destroy = var.force_destroy
 
   dynamic "cors_rule" {
     for_each = var.cors_rule == null ? [] : var.cors_rule
-
     content {
       allowed_headers = cors_rule.value.allowed_headers
       allowed_methods = cors_rule.value.allowed_methods
@@ -41,9 +40,8 @@ resource "digitalocean_spaces_bucket" "spaces" {
       dynamic "expiration" {
         for_each = var.expiration
         content {
-          date = lookup(expiration.value, "date", null)
-          days = lookup(expiration.value, "days", null)
-
+          date                         = lookup(expiration.value, "date", null)
+          days                         = lookup(expiration.value, "days", null)
           expired_object_delete_marker = lookup(expiration.value, "expired_object_delete_marker", false)
         }
       }
@@ -52,19 +50,17 @@ resource "digitalocean_spaces_bucket" "spaces" {
       }
     }
   }
-
   versioning {
     enabled = var.versioning
   }
-
 }
 
-
+##-----------------------------------------------------------------------------
+#Description : The digitalocean_spaces_bucket_policy resource allows Terraform to attach bucket policy to Spaces.
+##-----------------------------------------------------------------------------
 resource "digitalocean_spaces_bucket_policy" "foobar" {
-  count = var.enabled && var.policy != null ? 1 : 0
-
+  count  = var.enabled && var.policy != null ? 1 : 0
   region = join("", digitalocean_spaces_bucket.spaces[*].region)
   bucket = join("", digitalocean_spaces_bucket.spaces[*].name)
   policy = var.policy
 }
-
