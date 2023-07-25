@@ -20,7 +20,7 @@ variable "label_order" {
 
 variable "managedby" {
   type        = string
-  default     = "hello@clouddrove.com"
+  default     = "terraform-do-modules"
   description = "ManagedBy, eg 'terraform-do-modules' or 'hello@clouddrove.com'"
 }
 
