@@ -40,8 +40,8 @@ resource "digitalocean_spaces_bucket" "spaces" {
       dynamic "expiration" {
         for_each = var.expiration
         content {
-          date = lookup(expiration.value, "date", null)
-          days = lookup(expiration.value, "days", null)
+          date                         = lookup(expiration.value, "date", null)
+          days                         = lookup(expiration.value, "days", null)
           expired_object_delete_marker = lookup(expiration.value, "expired_object_delete_marker", false)
         }
       }
