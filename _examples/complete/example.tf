@@ -58,5 +58,12 @@ module "spaces" {
       }
     ]
   })
+  enabled_key = true
+  key_name    = "key"
+  grant = [
+    {
+      bucket     = ""
+      permission = "fullaccess"
+    }
+  ]
 }
-
