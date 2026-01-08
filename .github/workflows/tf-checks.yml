@@ -14,6 +14,12 @@ jobs:
     with:
       working_directory: './_examples/basic/'
 
+  bucket_object-example:
+    uses: clouddrove/github-shared-workflows/.github/workflows/tf-checks.yml@master
+    with:
+      working_directory: './_examples/bucket_object/'
+
+
 # Seperate Job for TFlint workflow call
   tf-lint:
     uses: clouddrove/github-shared-workflows/.github/workflows/tf-lint.yml@master
