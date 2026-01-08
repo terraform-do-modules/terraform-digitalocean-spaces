@@ -15,3 +15,8 @@ output "bucket_domain_name" {
   value       = module.spaces.bucket_domain_name
   description = "Name of SSH key."
 }
+
+output "spaces_key_grants" {
+  value       = module.spaces.key_grant
+  description = "Spaces key grants from module"
+}
