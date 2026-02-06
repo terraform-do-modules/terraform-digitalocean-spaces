@@ -1,6 +1,12 @@
 
 ## [1.0.0] - 2023-07-25
 ### :bug: Bug Fixes
+
+## [1.0.1] - 2026-02-06
+
+### ⬆️ Dependencies
+- Updated Terraform version requirement to >= 1.5.4
+
 - [`20ff8b9`](https://github.com/terraform-do-modules/terraform-digitalocean-spaces/commit/20ff8b958029073b9856fd2f42352e04736db502) - add resources and update github action *(commit by [@themaheshyadav](https://github.com/themaheshyadav))*
 - [`6d08572`](https://github.com/terraform-do-modules/terraform-digitalocean-spaces/commit/6d08572882b25fef7dca285f911aef481f4fbe99) - update space policy *(commit by [@themaheshyadav](https://github.com/themaheshyadav))*
 - [`58d510e`](https://github.com/terraform-do-modules/terraform-digitalocean-spaces/commit/58d510e364934a7c8d65994ba3300ac4a2a469f2) - update source of labels module and readme.yml file *(commit by [@themaheshyadav](https://github.com/themaheshyadav))*
