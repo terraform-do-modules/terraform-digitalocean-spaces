@@ -7,7 +7,7 @@ on:
 
 jobs: 
   checkov:
-    uses: clouddrove/github-shared-workflows/.github/workflows/checkov.yml@bd958ead76ac7c72acf4976c244c47eef89c84f7 # pinned to latest
+    uses: clouddrove/github-shared-workflows/.github/workflows/checkov.yml@1754bbe224200aa1d820cdf795d42de54b34245f # pinned to latest
     with:
       directory: '.'
       continue_on_error: 'true'
